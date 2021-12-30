@@ -2937,7 +2937,7 @@ cmtUint64 cmtSprintfOct(cmtU8str* out, cmtFmtInfo* info, cmtUint64 arg)
 
 cmtUint64 cmtSprintfDec(cmtU8str* out, cmtFmtInfo* info, cmtInt64 arg)
 {
-	cmtChar sign;
+	cmtChar sign = 0;
 	cmtChar* SignPos = 0;
 	cmtU8str pad, num;
 	cmtUint64 r;
@@ -2950,12 +2950,9 @@ cmtUint64 cmtSprintfDec(cmtU8str* out, cmtFmtInfo* info, cmtInt64 arg)
 		sign = '-';
 		arg = -arg;
 	}
-	else
-	{
-		if (info->sign) sign = '+';
-		else sign = 0;
-	}
-
+	else if (arg > 0 && info->sign)
+		sign = '+';
+	
 	//2. 测量数字字符数
 	num.size = 1;
 	while (num.size < sizeof(cmtBase10ExpFx64) / sizeof(cmtUint64) && arg >= cmtBase10ExpFx64[num.size]) num.size++;
@@ -3191,10 +3188,11 @@ cmtUint64 cmtSprintfHex(cmtU8str* out, cmtFmtInfo* info, cmtUint64 arg)
 cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 {
 	cmtU8str pad, itg, dec;
-	cmtChar sign;
+	cmtChar sign = 0;
 	cmtChar* SignPos = 0;
 	cmtUint64 r;
 	cmtUint64 MaxAddr = out->data + out->size;
+	cmtUint8 digit;
 
 	//1. 确定符号
 	if (arg < 0)
@@ -3202,11 +3200,8 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 		sign = '-';
 		arg = -arg;
 	}
-	else
-	{
-		if (info->sign) sign = '+';
-		else sign = 0;
-	}
+	else if (arg > 0 && info->sign)
+		sign = '+';
 
 	//2. 测量整数字符数
 	itg.size = 1;
@@ -3290,31 +3285,30 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 	//5.3. integer
 	for (r = 0; itg.size - r - 1 > 0; r++)
 	{
-		if (itg.data + r < MaxAddr)
-		{
-			itg.data[r] = arg / cmtBase10ExpFl64[itg.size - r - 1];//从左往右某个10进制数位的值
-			arg -= itg.data[r] * cmtBase10ExpFl64[itg.size - r - 1];//减去那个数位，剩下更低的数位
-			itg.data[r] += '0';//数位数值转为字符编码值
-		}
+		digit = arg / cmtBase10ExpFl64[itg.size - r - 1];//从左往右某个10进制数位的值
+		if (itg.data + r < MaxAddr) itg.data[r] = digit + '0';//数位数值转为字符编码值
+		arg -= digit * cmtBase10ExpFl64[itg.size - r - 1];//减去那个数位，剩下更低的数位
 	}
 	//只剩（只有）个位
-	itg.data[r] = arg;
-	arg -= itg.data[r];
-	itg.data[r] += '0';
+	digit = arg;
+	arg -= digit;
+	if (itg.data + r < MaxAddr) itg.data[r] = digit + '0';
 	//5.4. dot（小数点）
 	if (dec.data - 1 < MaxAddr)
 		dec.data[-1] = '.';
 	//5.5. decimal
 	//现在arg就只有小数部分了
-	for (r = 0; r < dec.size; r++)
+	arg *= 10.0;//将第一个小数位移到个位
+	for (r = 0; r < dec.size - 1; r++)
 	{
-		if (dec.data + r < MaxAddr)
-		{
-			arg *= 10.0;
-			dec.data[r] = arg;
-		}
+		digit = arg;
+		if (dec.data + r < MaxAddr) dec.data[r] = digit + '0';
+		arg -= digit;//减去个位（就是被移动过来的小数位）
+		arg *= 10.0;//将下一个小数位移到个位
 	}
-
+	//末位四舍五入
+	digit = arg + 0.5;
+	if (dec.data + r < MaxAddr) dec.data[r] = digit + '0';
 	//6. 返回值
 	if (sign)
 	{

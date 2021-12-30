@@ -606,6 +606,7 @@ void cmtDemoSprintfDec()
 	//u8->data="1234567     "（有5个空格）
 
 	//测试3：0
+	info.sign = TRUE;
 	info.padding.length = 0;
 	ret = cmtSprintfDec(&u8, &info, 0);
 	//标答：
@@ -670,6 +671,45 @@ void cmtDemoSprintfHex()
 	//标答：
 	//ret=12
 	//u8->data="0003A10DF9C5"
+}
+
+void cmtDemoSprintfFl64()
+{
+	cmtFmtInfo info;
+	info.sign = FALSE;
+	info.size = CMT_FMT_SIZE_L;
+	info.type = 'f';
+	info.precision = 2;
+	info.padding.align = FALSE;
+	info.padding.content = FALSE;
+	info.padding.length = 10;
+	cmtU8str u8;
+	u8.size = 1024;
+	u8.data = malloc(u8.size);
+	cmtUint64 ret;
+
+	//测试1：正数 保留两位小数 填充空格
+	ret = cmtSprintfFl64(&u8, &info, 4321.97);
+	//标答：
+	//ret=10
+	//u8->data="   4321.97"
+
+	//测试2：负数 填充0
+	info.precision = 0;
+	info.padding.content = TRUE;
+	ret = cmtSprintfFl64(&u8, &info, -9417735.1593117);
+	//标答：
+	//ret=11
+	//u8->data="-9417735.16"
+
+	//测试3：0
+	info.sign = TRUE;
+	info.padding.length = 0;
+	//标答：
+	//ret=1
+	//u8->data="0"
+
+	//测试4：
 }
 
 //int main(int argc, char** agrv)
