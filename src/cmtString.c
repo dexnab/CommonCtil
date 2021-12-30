@@ -3016,7 +3016,7 @@ cmtUint64 cmtSprintfDec(cmtU8str* out, cmtFmtInfo* info, cmtInt64 arg)
 
 	//6. 写入
 	//6.1. sign
-	if (sign && out->size)
+	if (sign && SignPos < out->size)
 		*SignPos = sign;
 	//6.2. padding
 	if (info->padding.align)
@@ -3272,6 +3272,60 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 		}
 	}
 
+	//5. 写入
+	//5.1. sign
+	if (sign && SignPos < MaxAddr)
+		*SignPos = sign;
+	//5.2. padding
+	if (info->padding.content)
+	{
+		for (r = 0; r < pad.size; r++)
+			if (pad.data + r < MaxAddr) pad.data[r] = '0';
+	}
+	else
+	{
+		for (r = 0; r < pad.size; r++)
+			if (pad.data + r < MaxAddr) pad.data[r] = ' ';
+	}
+	//5.3. integer
+	for (r = 0; itg.size - r - 1 > 0; r++)
+	{
+		if (itg.data + r < MaxAddr)
+		{
+			itg.data[r] = arg / cmtBase10ExpFl64[itg.size - r - 1];//从左往右某个10进制数位的值
+			arg -= itg.data[r] * cmtBase10ExpFl64[itg.size - r - 1];//减去那个数位，剩下更低的数位
+			itg.data[r] += '0';//数位数值转为字符编码值
+		}
+	}
+	//只剩（只有）个位
+	itg.data[r] = arg;
+	arg -= itg.data[r];
+	itg.data[r] += '0';
+	//5.4. dot（小数点）
+	if (dec.data - 1 < MaxAddr)
+		dec.data[-1] = '.';
+	//5.5. decimal
+	//现在arg就只有小数部分了
+	for (r = 0; r < dec.size; r++)
+	{
+		if (dec.data + r < MaxAddr)
+		{
+			arg *= 10.0;
+			dec.data[r] = arg;
+		}
+	}
+
+	//6. 返回值
+	if (sign)
+	{
+		if (2 + pad.size + itg.size + dec.size > out->size) return out->size;
+		else return 2 + pad.size + itg.size + dec.size;
+	}
+	else
+	{
+		if (1 + pad.size + itg.size + dec.size > out->size) return out->size;
+		else return 1 + pad.size + itg.size + dec.size;
+	}
 }
 
 void cmtSprintf(cmtU8str* out, cmtU8str* format, ...)
