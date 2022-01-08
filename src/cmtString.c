@@ -3194,7 +3194,10 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 	cmtUint64 MaxAddr = out->data + out->size;
 	cmtUint8 digit;
 
-	//1. 确定符号
+	//1. 浮点数特殊值
+	if (arg == INFINITY)
+
+	//2. 确定符号
 	if (arg < 0)
 	{
 		sign = '-';
@@ -3203,15 +3206,15 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 	else if (arg > 0 && info->sign)
 		sign = '+';
 
-	//2. 测量整数字符数
+	//3. 测量整数字符数
 	itg.size = 1;
 	while (itg.size < sizeof(cmtBase10ExpFl64) / sizeof(double) && arg >= cmtBase10ExpFl64[itg.size]) itg.size++;
 
-	//3. 确定小数字符数
+	//4. 确定小数字符数
 	if (info->precision && info->precision > 4) dec.size = info->precision;
 	else dec.size = 4;
 
-	//4. 计算填充字符数
+	//5. 计算填充字符数
 	if (sign)
 	{
 		if (info->padding.length > 2 + itg.size + dec.size) pad.size = info->padding.length - 2 - itg.size - dec.size;
@@ -3223,7 +3226,7 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 		else pad.size = 0;
 	}
 
-	//5. 定位
+	//6. 定位
 	if (sign)
 	{
 		if (info->padding.align)
@@ -3267,11 +3270,11 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 		}
 	}
 
-	//5. 写入
-	//5.1. sign
+	//7. 写入
+	//7.1. sign
 	if (sign && SignPos < MaxAddr)
 		*SignPos = sign;
-	//5.2. padding
+	//7.2. padding
 	if (info->padding.content)
 	{
 		for (r = 0; r < pad.size; r++)
@@ -3282,7 +3285,7 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 		for (r = 0; r < pad.size; r++)
 			if (pad.data + r < MaxAddr) pad.data[r] = ' ';
 	}
-	//5.3. integer
+	//7.3. integer
 	for (r = 0; itg.size - r - 1 > 0; r++)
 	{
 		digit = arg / cmtBase10ExpFl64[itg.size - r - 1];//从左往右某个10进制数位的值
@@ -3293,10 +3296,10 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 	digit = arg;
 	arg -= digit;
 	if (itg.data + r < MaxAddr) itg.data[r] = digit + '0';
-	//5.4. dot（小数点）
+	//7.4. dot（小数点）
 	if (dec.data - 1 < MaxAddr)
 		dec.data[-1] = '.';
-	//5.5. decimal
+	//7.5. decimal
 	//现在arg就只有小数部分了
 	arg *= 10.0;//将第一个小数位移到个位
 	for (r = 0; r < dec.size - 1; r++)
@@ -3309,7 +3312,8 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 	//末位四舍五入
 	digit = arg + 0.5;
 	if (dec.data + r < MaxAddr) dec.data[r] = digit + '0';
-	//6. 返回值
+
+	//8. 返回值
 	if (sign)
 	{
 		if (2 + pad.size + itg.size + dec.size > out->size) return out->size;

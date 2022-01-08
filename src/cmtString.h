@@ -189,10 +189,10 @@ typedef struct _CMTFMTINFO
 */
 #define CMT_FMT_SIZE_LL 4
 
-//10^22
-#define CMT_DOUBLE_MAX_10E 1.0e+22
-//10^9
-#define CMT_FLOAT_MAX_10E 1.0e+9
+#define CMT_DOUBLE_INF_P (double)0x7FF0000000000000
+
+#define CMT_DOUBLE_INF_N (double)0xFFF0000000000000
+
 
 /**
 * @brief 用于初始化字符串结构体
@@ -952,6 +952,8 @@ extern cmtUint64 cmtSprintfHex(cmtU8str* out, cmtFmtInfo* info, cmtUint64 arg);
 * @author dexnab
 */
 extern cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg);
+
+extern cmtUint64 cmtSprintfStrU8(cmtU8str* out, cmtFmtInfo* info, cmtU8str* arg);
 
 //status: NC
 extern cmtUint64 cmtSprintfSize(cmtU8str* format, ...);
