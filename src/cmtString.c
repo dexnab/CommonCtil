@@ -3185,6 +3185,11 @@ cmtUint64 cmtSprintfHex(cmtU8str* out, cmtFmtInfo* info, cmtUint64 arg)
 	else return pad.size + num.size;
 }
 
+cmtUint64 cmtSprintfFl64Ex2(cmtU8str* out, cmtFmtInfo* info, double arg)
+{
+
+}
+
 cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 {
 	cmtU8str pad, itg, dec;
@@ -3194,10 +3199,7 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 	cmtUint64 MaxAddr = out->data + out->size;
 	cmtUint8 digit;
 
-	//1. 浮点数特殊值
-	if (arg == INFINITY)
-
-	//2. 确定符号
+	//1. 确定符号
 	if (arg < 0)
 	{
 		sign = '-';
@@ -3205,6 +3207,9 @@ cmtUint64 cmtSprintfFl64(cmtU8str* out, cmtFmtInfo* info, double arg)
 	}
 	else if (arg > 0 && info->sign)
 		sign = '+';
+
+	//2. 浮点数特殊值
+
 
 	//3. 测量整数字符数
 	itg.size = 1;
