@@ -118,7 +118,7 @@ extern void cmtDemoStrToHex();
 * @date 2021-12-04
 * @author dexnab
 */
-extern void cmtDemoStrToF32();
+extern cmtBool cmtDemoStrToF32();
 
 /**
 * @brief 字符串转32位浮点

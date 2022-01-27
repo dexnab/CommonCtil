@@ -1783,6 +1783,10 @@ _T12:
 	r++;
 	if (r >= in->size)
 		goto _Tend;
+	if (in->data[r] == '0')
+		goto _T15;
+	if (in->data[r] >= '1' && in->data[r] <= '9')
+		goto _T16;
 	if (in->data[r] == '+')
 		goto _T13;
 	if (in->data[r] == '-')

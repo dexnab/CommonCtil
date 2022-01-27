@@ -80,7 +80,7 @@ void cmtDemoU8()
 	cmtU8toU16(&u8b, &u16);
 	//标答：u16->data="\x31\x00\x32\x00\x33\x00\x4b\x6d\xd5\x8b\x31\x00\x32\x00\x33\x00\x4f\xd8\x55\xdc\x61\x00"
 	//u16->size=24;
-	
+
 	//测试3：UTF-8转UTF-32
 	u32.size = cmtU8toU32size(&u8b);
 	u32.data = malloc(u32.size);
@@ -342,7 +342,7 @@ void cmtDemoStrToHex()
 	//标答：num=0 ret=0
 }
 
-void cmtDemoStrToF32()
+cmtBool cmtDemoStrToF32()
 {
 	cmtU8str str1 = CMT_CONSTSTR("1.4567");
 	str1.size = 3;
@@ -374,50 +374,64 @@ void cmtDemoStrToF32()
 	//测试1：边界检测
 	ret = cmtStrToF32(&str1, &num);
 	//标答：num=1.4（近似即可） ret=3
-	
+	if (num != 1.4f || ret != 3) return TRUE;
+
 	//测试2：普通小数
 	ret = cmtStrToF32(&str2, &num);
 	//标答：num=123.0007（近似即可） ret=8
-	
+	if (num != 123.0007f || ret != 8) return TRUE;
+
 	//测试3：极大数
 	ret = cmtStrToF32(&str3, &num);
 	//标答：num=1.357e+30（近似即可） ret=35
-	
+	if (num != 1.357e+30f || ret != 35) return TRUE;
+
 	//测试4：极小数
 	ret = cmtStrToF32(&str4, &num);
 	//标答：num=1.357e-28（近似即可） ret=33
-	
+	if (num != 1.357e-28f || ret != 33) return TRUE;
+
 	//测试5：科学计数法（小写e）
 	ret = cmtStrToF32(&str5, &num);
 	//标答：num=1.23543e+22（近似即可） ret=11
-	
+	if (num != 1.23543e+22f || ret != 11) return TRUE;
+
 	//测试6：科学计数法（大写E）
 	ret = cmtStrToF32(&str6, &num);
-	//标答：num=9.20003+21（近似即可） ret=11
-	
+	//标答：num=9.20003e+21（近似即可） ret=11
+	if (num != 9.20003e+21f || ret != 11) return TRUE;
+
 	//测试7：干扰字符检测1
 	ret = cmtStrToF32(&str7, &num);
 	//标答：num=543.159（近似即可） ret=7
-	
+	if (num != 543.15f || ret != 7) return TRUE;
+
 	//测试8：干扰字符检测2
 	ret = cmtStrToF32(&str8, &num);
 	//标答：num=0.0 ret=0
+	if (num != 0.0f || ret != 0) return TRUE;
 
 	//测试9：负数
 	ret = cmtStrToF32(&str9, &num);
 	//标答：num=-164.327（近似即可） ret=11
+	if (num != -164.327f || ret != 11) return TRUE;
 
 	//测试10：负指数
 	ret = cmtStrToF32(&str10, &num);
 	//标答：num=5.8013e-8（近似即可） ret=12
+	if (num != 5.8013e-8f || ret != 12) return TRUE;
 
 	//测试11：无小数
 	ret = cmtStrToF32(&str11, &num);
 	//标答：num=65300.0（近似即可） ret=6
+	if (num != 65300.0f || ret != 6) return TRUE;
 
 	//测试12：无整数
 	ret = cmtStrToF32(&str12, &num);
 	//标答：num=0.0366 ret=7
+	if (num != 0.0366f || ret != 7) return TRUE;
+
+	return FALSE;
 }
 
 void cmtDemoStrToF64()
@@ -570,7 +584,7 @@ void cmtDemoSprintfOct()
 	u8.size = 1024;
 	u8.data = malloc(u8.size);
 	cmtUint64 ret;
-	
+
 	ret = cmtSprintfOct(&u8, &info, 03141643122);
 	//标答：
 	//ret=10
