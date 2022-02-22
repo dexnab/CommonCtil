@@ -6,6 +6,7 @@ typedef struct _CMTCONF
 	cmtUint8 aes : 1;
 	cmtUint8 avx : 1;
 	cmtUint8 avx2 : 1;
+	cmtUint8 cmov : 1;
 	cmtUint8 fpu : 1;
 	cmtUint8 mmx : 1;
 	cmtUint8 mmxext : 1;
